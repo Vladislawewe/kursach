@@ -1,0 +1,10 @@
+{% extends "booking/home.html" %}
+{% block content %}
+<h2>Назначить сотрудника на заказ №{{ order.id }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Назначить</button>
+    <a href="{% url 'order_list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

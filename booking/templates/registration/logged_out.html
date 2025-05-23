@@ -1,0 +1,6 @@
+{% extends "booking/home.html" %}
+{% block content %}
+  <h2>Вы вышли из системы</h2>
+  <p>Вы успешно вышли из своей учетной записи.</p>
+  <a href="{% url 'login' %}" class="btn btn-primary">Войти снова</a>
+{% endblock %}

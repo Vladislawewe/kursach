@@ -1,0 +1,55 @@
+{% extends "booking/home.html" %}
+{% block content %}
+<h2>Список бронирований</h2>
+
+<!-- Фильтр по статусу и дате -->
+<form method="get" class="row mb-3">
+  <div class="col">
+    <select name="status" class="form-control">
+      <option value="">Статус (все)</option>
+      <option value="pending" {% if selected_status == "pending" %}selected{% endif %}>Ожидает</option>
+      <option value="confirmed" {% if selected_status == "confirmed" %}selected{% endif %}>Подтверждено</option>
+      <option value="cancelled" {% if selected_status == "cancelled" %}selected{% endif %}>Отменено</option>
+    </select>
+  </div>
+  <div class="col">
+    <input type="date" name="date" class="form-control" value="{{ selected_date }}">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">Фильтр</button>
+  </div>
+</form>
+
+<a href="{% url 'reservation_create' %}" class="btn btn-success mb-3">Добавить бронирование</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Клиент</th>
+            <th>Стол</th>
+            <th>Дата</th>
+            <th>Статус</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reservation in reservations %}
+        <tr>
+            <td>{{ reservation.customer.name }}</td>
+            <td>{{ reservation.table.number }}</td>
+            <td>{{ reservation.date }}</td>
+            <td>
+                {% if reservation.status == "pending" %}Ожидает{% elif reservation.status == "confirmed" %}Подтверждено{% elif reservation.status == "cancelled" %}Отменено{% else %}{{ reservation.status }}{% endif %}
+            </td>
+            <td>
+                <a href="{% url 'reservation_update' reservation.pk %}" class="btn btn-primary btn-sm">Изменить</a>
+                <a href="{% url 'reservation_delete' reservation.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Нет бронирований</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

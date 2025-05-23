@@ -1,0 +1,10 @@
+{% extends "booking/home.html" %}
+{% block content %}
+<h2>Удалить бронирование</h2>
+<p>Вы уверены, что хотите удалить бронирование для {{ reservation.customer }}?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a href="{% url 'reservation_list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

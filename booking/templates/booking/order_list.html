@@ -1,0 +1,58 @@
+{% extends "booking/home.html" %}
+{% block content %}
+<h2>Список заказов</h2>
+
+<!-- Фильтры по столу и клиенту -->
+<form method="get" class="row mb-3">
+  <div class="col">
+    <select name="table" class="form-control">
+      <option value="">Все столы</option>
+      {% for table in tables %}
+        <option value="{{ table.id }}" {% if selected_table == table.id|add:"" %}selected{% endif %}>{{ table.number }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col">
+    <select name="customer" class="form-control">
+      <option value="">Все клиенты</option>
+      {% for customer in customers %}
+        <option value="{{ customer.id }}" {% if selected_customer == customer.id|add:"" %}selected{% endif %}>{{ customer.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">Фильтр</button>
+  </div>
+</form>
+
+<a href="{% url 'order_create' %}" class="btn btn-success mb-3">Добавить заказ</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Стол</th>
+            <th>Клиент</th>
+            <th>Дата</th>
+            <th>Статус</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.table.number }}</td>
+            <td>{{ order.customer.name }}</td>
+            <td>{{ order.date }}</td>
+            <td>{{ order.status }}</td>
+            <td>
+                <a href="{% url 'order_update' order.pk %}" class="btn btn-primary btn-sm">Изменить</a>
+                <a href="{% url 'order_delete' order.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Нет заказов</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

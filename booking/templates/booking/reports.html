@@ -1,0 +1,59 @@
+{% extends "booking/home.html" %}
+{% block content %}
+<h2>Отчёты</h2>
+<form method="get" class="row mb-4">
+  <div class="col-auto">
+    <input type="date" name="date" class="form-control" value="{{ date }}">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">Показать</button>
+  </div>
+</form>
+
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card text-bg-success mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Оборот за день</h5>
+        <p class="card-text fs-4">{{ day_turnover }} ₽</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-info mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Оборот за месяц</h5>
+        <p class="card-text fs-4">{{ month_turnover }} ₽</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-primary mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Количество заказов</h5>
+        <p class="card-text fs-4">{{ orders_count }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h4>Самые популярные блюда</h4>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Блюдо</th>
+      <th>Заказано, шт</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for dish in popular_dishes %}
+    <tr>
+      <td>{{ dish.menu_item__name }}</td>
+      <td>{{ dish.total }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="2">Нет данных</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
