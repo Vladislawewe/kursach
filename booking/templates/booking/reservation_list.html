@@ -26,7 +26,7 @@
         <tr>
             <th>Клиент</th>
             <th>Стол</th>
-            <th>Дата</th>
+            <th>Дата и время</th>
             <th>Статус</th>
             <th></th>
         </tr>
@@ -35,11 +35,15 @@
         {% for reservation in reservations %}
         <tr>
             <td>{{ reservation.customer.name }}</td>
-            <td>{{ reservation.table.number }}</td>
-            <td>{{ reservation.date }}</td>
             <td>
-                {% if reservation.status == "pending" %}Ожидает{% elif reservation.status == "confirmed" %}Подтверждено{% elif reservation.status == "cancelled" %}Отменено{% else %}{{ reservation.status }}{% endif %}
+                {% if reservation.table %}
+                  {{ reservation.table.number }}
+                {% else %}
+                  -
+                {% endif %}
             </td>
+            <td>{{ reservation.reserved_at|date:"d.m.Y H:i" }}</td>
+            <td>{{ reservation.get_status_display }}</td>
             <td>
                 <a href="{% url 'reservation_update' reservation.pk %}" class="btn btn-primary btn-sm">Изменить</a>
                 <a href="{% url 'reservation_delete' reservation.pk %}" class="btn btn-danger btn-sm">Удалить</a>

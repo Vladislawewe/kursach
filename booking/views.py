@@ -6,6 +6,11 @@ from django.contrib import messages
 from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import datetime
+from .constants import (
+    RESERVATION_STATUS_CHOICES,
+    STATUS_OCCUPIED, STATUS_FREE,
+    RESERVATION_STATUS_CONFIRMED, RESERVATION_STATUS_CANCELLED
+)
 
 def home(request):
     return render(request, 'booking/home.html')
@@ -37,21 +42,25 @@ def reservation_list(request):
     if status:
         reservations = reservations.filter(status=status)
     if date:
-        reservations = reservations.filter(date=date)
+        # фильтрация по дате, даже если reserved_at - DateTimeField
+        try:
+            date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+            reservations = reservations.filter(reserved_at__date=date_obj)
+        except ValueError:
+            pass
     return render(request, 'booking/reservation_list.html', {
         'reservations': reservations,
         'selected_status': status,
         'selected_date': date,
     })
 
+@login_required
 def reservation_create(request):
     if request.method == 'POST':
         form = ReservationForm(request.POST)
         if form.is_valid():
             reservation = form.save()
-            table = reservation.table
-            table.status = 'busy'
-            table.save()
+            # table.status обновится сигналом!
             return redirect('reservation_list')
     else:
         form = ReservationForm()
@@ -171,6 +180,7 @@ def order_list(request):
         'selected_customer': customer_id
     })
 
+@login_required
 def order_create(request):
     if request.method == 'POST':
         form = OrderForm(request.POST)
@@ -179,20 +189,23 @@ def order_create(request):
             order = form.save()
             formset.instance = order
             formset.save()
+            # После сохранения orderitems — trigger signals для пересчета счета!
             return redirect('order_list')
     else:
         form = OrderForm()
         formset = OrderItemFormSet()
     return render(request, 'booking/order_form.html', {'form': form, 'formset': formset})
 
+@login_required
 def order_update(request, pk):
-    order = Order.objects.get(pk=pk)
+    order = get_object_or_404(Order, pk=pk)
     if request.method == 'POST':
         form = OrderForm(request.POST, instance=order)
         formset = OrderItemFormSet(request.POST, instance=order)
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
+            # После изменений триггерится сигнал для пересчета счета
             return redirect('order_list')
     else:
         form = OrderForm(instance=order)
@@ -258,8 +271,9 @@ def customer_delete(request, pk):
         return redirect('customer_list')
     return render(request, 'booking/customer_confirm_delete.html', {'customer': customer})
 
+@login_required
 def reservation_update(request, pk):
-    reservation = Reservation.objects.get(pk=pk)
+    reservation = get_object_or_404(Reservation, pk=pk)
     if request.method == 'POST':
         form = ReservationForm(request.POST, instance=reservation)
         if form.is_valid():
@@ -269,13 +283,13 @@ def reservation_update(request, pk):
         form = ReservationForm(instance=reservation)
     return render(request, 'booking/reservation_form.html', {'form': form})
 
+@login_required
 def reservation_delete(request, pk):
-    reservation = Reservation.objects.get(pk=pk)
+    reservation = get_object_or_404(Reservation, pk=pk)
     if request.method == 'POST':
         reservation.delete()
         return redirect('reservation_list')
     return render(request, 'booking/reservation_confirm_delete.html', {'reservation': reservation})
-
 
 def your_view(request):
     # ...
@@ -284,6 +298,7 @@ def your_view(request):
     # ...
 
 
+@login_required
 def reports_view(request):
     date_str = request.GET.get('date')
     if date_str:
@@ -306,12 +321,13 @@ def reports_view(request):
         issued_at__month=month
     ).aggregate(total=Sum('total'))['total'] or 0
 
-    # Количество заказов за день
-    orders_count = Bill.objects.filter(issued_at__date=date).count()
+    # Количество заказов за день (учитываем Order, а не Bill)
+    orders_count = Order.objects.filter(created_at__date=date).count()
 
-    # Самые популярные блюда
+    # Самые популярные блюда (исключая удалённые menu_item)
     popular_dishes = (
         OrderItem.objects
+        .filter(menu_item__isnull=False)
         .values('menu_item__name')
         .annotate(total=Sum('quantity'))
         .order_by('-total')[:5]

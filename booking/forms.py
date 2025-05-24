@@ -1,5 +1,6 @@
 from django import forms
 from .models import Customer, Reservation, MenuItem, Table, Employee, Order, OrderItem, Bill
+from .constants import RESERVATION_STATUS_CHOICES, TABLE_STATUS_CHOICES
 
 class CustomerForm(forms.ModelForm):
     class Meta:
@@ -12,6 +13,7 @@ class CustomerForm(forms.ModelForm):
         }
 
 class ReservationForm(forms.ModelForm):
+    status = forms.ChoiceField(choices=RESERVATION_STATUS_CHOICES, label='Статус')
     class Meta:
         model = Reservation
         fields = ['customer', 'table', 'reserved_at', 'guests', 'status', 'comment']
@@ -27,7 +29,6 @@ class ReservationForm(forms.ModelForm):
             'reserved_at': forms.DateTimeInput(attrs={'type': 'datetime-local'})
         }
 
-
 class MenuItemForm(forms.ModelForm):
     class Meta:
         model = MenuItem
@@ -38,7 +39,9 @@ class MenuItemForm(forms.ModelForm):
             'price': 'Цена',
             'available': 'Доступно'
         }
+
 class TableForm(forms.ModelForm):
+    status = forms.ChoiceField(choices=TABLE_STATUS_CHOICES, label='Статус')
     class Meta:
         model = Table
         fields = ['number', 'seats', 'status']
@@ -64,7 +67,6 @@ class OrderAssignEmployeeForm(forms.ModelForm):
         model = Order
         fields = ['employee']
         labels = {'employee': 'Сотрудник'}
-
 
 class OrderForm(forms.ModelForm):
     class Meta:
@@ -95,10 +97,9 @@ OrderItemFormSet = forms.inlineformset_factory(
 class BillForm(forms.ModelForm):
     class Meta:
         model = Bill
-        fields = ['order', 'total', 'paid', 'payment_method']
+        fields = ['order', 'paid', 'payment_method']
         labels = {
             'order': 'Заказ',
-            'total': 'Сумма',
             'paid': 'Оплачен',
             'payment_method': 'Способ оплаты'
         }

@@ -1,0 +1,19 @@
+STATUS_FREE = 'free'
+STATUS_OCCUPIED = 'occupied'
+STATUS_RESERVED = 'reserved'
+
+TABLE_STATUS_CHOICES = [
+    (STATUS_FREE, 'Свободный'),
+    (STATUS_OCCUPIED, 'Занят'),
+    (STATUS_RESERVED, 'Забронирован'),
+]
+
+RESERVATION_STATUS_PENDING = 'pending'
+RESERVATION_STATUS_CONFIRMED = 'confirmed'
+RESERVATION_STATUS_CANCELLED = 'cancelled'
+
+RESERVATION_STATUS_CHOICES = [
+    (RESERVATION_STATUS_PENDING, 'В ожидании'),
+    (RESERVATION_STATUS_CONFIRMED, 'Подтверждено'),
+    (RESERVATION_STATUS_CANCELLED, 'Отменено'),
+]
